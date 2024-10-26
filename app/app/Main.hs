@@ -1,7 +1,7 @@
 module Main where
 
 import Data.Aeson
-import Data.Text (Text)
+import Data.Text (Text, pack)
 import GHC.Generics
 import Network.Wai
 import Network.Wai.Handler.Warp
@@ -15,6 +15,7 @@ type ItemApi =
   Get '[PlainText] Text
     :<|> "item" :> Get '[JSON] [Item]
     :<|> "item" :> Capture "itemId" Integer :> Get '[JSON] Item
+    :<|> "add" :> Capture "a" Integer :> Capture "b" Integer :> Get '[PlainText] Text
 
 itemApi :: Proxy ItemApi
 itemApi = Proxy
@@ -38,9 +39,13 @@ server =
   home
     :<|> getItems
     :<|> getItemById
+    :<|> addNumbers
 
 home :: Handler Text
 home = return "Hello World!"
+
+addNumbers :: Integer -> Integer -> Handler Text
+addNumbers a b = return (Data.Text.pack (show (a + b)))
 
 getItems :: Handler [Item]
 getItems = return [exampleItem]

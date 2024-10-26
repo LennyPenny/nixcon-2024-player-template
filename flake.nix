@@ -1,6 +1,10 @@
 {
   description = "NixCon 2024 - NixOS on garnix: Production-grade hosting as a game";
 
+  nixConfig = {
+    allow-import-from-derivation = "true";
+  };
+
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
   inputs.flake-utils.url = "github:numtide/flake-utils";
@@ -12,7 +16,13 @@
     };
   };
 
-  outputs = { self, nixpkgs, garnix-lib, flake-utils }:
+  inputs.app = {
+    url = "path:app/";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+
+
+  outputs = { self, nixpkgs, garnix-lib, flake-utils, app }:
     let
       system = "x86_64-linux";
     in
@@ -20,7 +30,7 @@
       let pkgs = import nixpkgs { inherit system; };
       in rec {
         packages = {
-          webserver = pkgs.hello;
+          webserver = app.packages.${system}.default;
           default = packages.webserver;
         };
         apps.default = {

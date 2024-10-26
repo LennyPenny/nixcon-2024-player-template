@@ -1,6 +1,7 @@
 module Main where
 
 import Data.Aeson
+import Data.Text (Text)
 import GHC.Generics
 import Network.Wai
 import Network.Wai.Handler.Warp
@@ -11,7 +12,7 @@ import System.IO
 -- * api
 
 type ItemApi =
-  GetNoContent
+  Get '[PlainText] Text
     :<|> "item" :> Get '[JSON] [Item]
     :<|> "item" :> Capture "itemId" Integer :> Get '[JSON] Item
 
@@ -38,8 +39,8 @@ server =
     :<|> getItems
     :<|> getItemById
 
-home :: Handler NoContent
-home = return NoContent
+home :: Handler Text
+home = return "Hello World!"
 
 getItems :: Handler [Item]
 getItems = return [exampleItem]

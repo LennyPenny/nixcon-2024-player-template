@@ -102,6 +102,7 @@ common shared
         , aeson
         , wai >= 3.2
         , warp >= 3.2
+        , text
 
 executable empty
     -- Import common warning flags.

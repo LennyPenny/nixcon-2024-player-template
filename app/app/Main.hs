@@ -1,7 +1,13 @@
 module Main where
 
 import Data.Aeson
+import Data.Char (ord)
 import Data.Text (Text, pack)
+import Data.UUID
+import Data.UUID.V1 qualified as Data
+import Data.UUID.V3 (namespaceDNS)
+import Data.UUID.V3 qualified as Data
+import Data.Word
 import GHC.Generics
 import Network.Wai
 import Network.Wai.Handler.Warp
@@ -17,6 +23,7 @@ type ItemApi =
     :<|> "item" :> Capture "itemId" Integer :> Get '[JSON] Item
     :<|> "add" :> Capture "a" Integer :> Capture "b" Integer :> Get '[PlainText] Text
     :<|> "mult" :> Capture "a" Integer :> Capture "b" Integer :> Get '[PlainText] Text
+    :<|> "uuid" :> Get '[PlainText] Text
 
 itemApi :: Proxy ItemApi
 itemApi = Proxy
@@ -42,6 +49,7 @@ server =
     :<|> getItemById
     :<|> addNumbers
     :<|> multNumbers
+    :<|> uuid
 
 home :: Handler Text
 home = return "Hello World!"
@@ -51,6 +59,11 @@ addNumbers a b = return (Data.Text.pack (show (a + b)))
 
 multNumbers :: Integer -> Integer -> Handler Text
 multNumbers a b = return (Data.Text.pack (show (a * b)))
+
+uuid :: Handler Text
+uuid = return (Data.Text.pack (show (Data.generateNamed namespaceDNS name)))
+  where
+    name = map (fromIntegral . ord) "www.widgets.com" :: [Word8]
 
 getItems :: Handler [Item]
 getItems = return [exampleItem]

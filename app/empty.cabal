@@ -103,6 +103,7 @@ common shared
         , wai >= 3.2
         , warp >= 3.2
         , text
+        , uuid
 
 executable empty
     -- Import common warning flags.

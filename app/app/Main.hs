@@ -16,6 +16,7 @@ type ItemApi =
     :<|> "item" :> Get '[JSON] [Item]
     :<|> "item" :> Capture "itemId" Integer :> Get '[JSON] Item
     :<|> "add" :> Capture "a" Integer :> Capture "b" Integer :> Get '[PlainText] Text
+    :<|> "mult" :> Capture "a" Integer :> Capture "b" Integer :> Get '[PlainText] Text
 
 itemApi :: Proxy ItemApi
 itemApi = Proxy
@@ -40,12 +41,16 @@ server =
     :<|> getItems
     :<|> getItemById
     :<|> addNumbers
+    :<|> multNumbers
 
 home :: Handler Text
 home = return "Hello World!"
 
 addNumbers :: Integer -> Integer -> Handler Text
 addNumbers a b = return (Data.Text.pack (show (a + b)))
+
+multNumbers :: Integer -> Integer -> Handler Text
+multNumbers a b = return (Data.Text.pack (show (a * b)))
 
 getItems :: Handler [Item]
 getItems = return [exampleItem]

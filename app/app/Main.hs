@@ -5,12 +5,14 @@ import GHC.Generics
 import Network.Wai
 import Network.Wai.Handler.Warp
 import Servant
+import Servant.API.Status (statusFromNat)
 import System.IO
 
 -- * api
 
 type ItemApi =
-  "item" :> Get '[JSON] [Item]
+  GetNoContent
+    :<|> "item" :> Get '[JSON] [Item]
     :<|> "item" :> Capture "itemId" Integer :> Get '[JSON] Item
 
 itemApi :: Proxy ItemApi
@@ -32,8 +34,12 @@ mkApp = return $ serve itemApi server
 
 server :: Server ItemApi
 server =
-  getItems
+  home
+    :<|> getItems
     :<|> getItemById
+
+home :: Handler NoContent
+home = return NoContent
 
 getItems :: Handler [Item]
 getItems = return [exampleItem]

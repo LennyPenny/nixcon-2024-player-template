@@ -1,10 +1,6 @@
 {
   description = "NixCon 2024 - NixOS on garnix: Production-grade hosting as a game";
 
-  nixConfig = {
-    allow-import-from-derivation = "true";
-  };
-
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
   inputs.flake-utils.url = "github:numtide/flake-utils";
@@ -16,38 +12,36 @@
     };
   };
 
-  inputs.app = {
-    url = "path:app/";
-    inputs.nixpkgs.follows = "nixpkgs";
-  };
 
-
-  outputs = { self, nixpkgs, garnix-lib, flake-utils, app }:
+  outputs = { self, nixpkgs, garnix-lib, flake-utils }:
     let
       system = "x86_64-linux";
     in
-    (flake-utils.lib.eachSystem [ "x86_64-linux" ] (system:
-      let pkgs = import nixpkgs { inherit system; };
-      in rec {
-        packages = {
-          webserver = app.packages.${system}.default;
-          default = packages.webserver;
-        };
-        apps.default = {
-          type = "app";
-          program = pkgs.lib.getExe (
-            pkgs.writeShellApplication {
-              name = "start-webserver";
-              runtimeEnv = {
-                PORT = "8080";
-              };
-              text = ''
-                ${pkgs.lib.getExe packages.webserver}
-              '';
-            }
-          );
-        };
-      }))
+    (flake-utils.lib.eachSystem [ "x86_64-linux" ]
+      (system:
+        let pkgs = import nixpkgs { inherit system; };
+        in rec {
+          packages = {
+            webserver = import ./app/package.nix {
+              inherit pkgs;
+            };
+            default = packages.webserver;
+          };
+          apps.default = {
+            type = "app";
+            program = pkgs.lib.getExe (
+              pkgs.writeShellApplication {
+                name = "start-webserver";
+                runtimeEnv = {
+                  PORT = "8080";
+                };
+                text = ''
+                  ${pkgs.lib.getExe packages.webserver}
+                '';
+              }
+            );
+          };
+        }))
     //
     {
       nixosConfigurations.server = nixpkgs.lib.nixosSystem {
